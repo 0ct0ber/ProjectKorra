@@ -73,19 +73,22 @@ public class WaterReturn extends WaterAbility {
 
 		Vector direction = GeneralMethods.getDirection(location, player.getEyeLocation()).normalize();
 		time = System.currentTimeMillis();
-		location = location.clone().add(direction);
 
 		if (location == null || block == null) {
 			remove();
 			return;
-		} else if (location.getBlock().equals(block.getLocation().getBlock())) {
-			return;
+		} else {
+		        location = location.clone().add(direction);
+			if (location.getBlock().equals(block.getLocation().getBlock())) {
+			        return;
+			}
 		}
 
-		if (location.distanceSquared(player.getEyeLocation()) > range * range) {
+		double distance = location.distanceSquared(player.getEyeLocation());
+		if (distance > range * range) {
 			remove();
 			return;
-		} else if (location.distanceSquared(player.getEyeLocation()) <= 1.5 * 1.5) {
+		} else if (distance <= 1.5 * 1.5) {
 			fillBottle();
 			remove();
 			return;
