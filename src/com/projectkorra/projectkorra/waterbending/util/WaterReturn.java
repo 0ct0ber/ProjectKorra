@@ -19,7 +19,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class WaterReturn extends WaterAbility {
 
@@ -87,6 +87,7 @@ public class WaterReturn extends WaterAbility {
 			return;
 		} else if (location.distanceSquared(player.getEyeLocation()) <= 1.5 * 1.5) {
 			fillBottle();
+			remove();
 			return;
 		}
 
@@ -122,36 +123,32 @@ public class WaterReturn extends WaterAbility {
 	}
 
 	private void fillBottle() {
-		PlayerInventory inventory = player.getInventory();
-		if (inventory.contains(Material.GLASS_BOTTLE)) {
-			int index = inventory.first(Material.GLASS_BOTTLE);
+		int index = player.getInventory().first(Material.GLASS_BOTTLE);
+		if (index != -1) {
 			ItemStack item = inventory.getItem(index);
-
 			if (item.getAmount() == 1) {
 				inventory.setItem(index, new ItemStack(Material.POTION));
 			} else {
 				item.setAmount(item.getAmount() - 1);
 				inventory.setItem(index, item);
-				HashMap<Integer, ItemStack> leftover = inventory.addItem(new ItemStack(Material.POTION));
-				for (int left : leftover.keySet()) {
-					player.getWorld().dropItemNaturally(player.getLocation(), leftover.get(left));
+				Map<Integer, ItemStack> leftover = inventory.addItem(new ItemStack(Material.POTION));
+				if (!leftover.isEmpty()) {
+					player.getWorld().dropItemNaturally(player.getLocation(), new ItemStack(Material.POTION));
 				}
 			}
 		}
-		remove();
 	}
 
+	@Deprecated
 	private static boolean isBending(Player player) {
-		if (hasAbility(player, WaterManipulation.class) || hasAbility(player, WaterManipulation.class) || hasAbility(player, OctopusForm.class)
+		return hasAbility(player, WaterManipulation.class) || hasAbility(player, OctopusForm.class) || hasAbility(player, SurgeWall.class) || hasAbility(player, IceSpikeBlast.class);
 		// || hasAbility(player, SurgeWave.class) NOTE: ONLY DISABLED TO PREVENT BOTTLEBENDING FROM BEING DISABLED FOREVER. ONCE BOTTLEBENDING HAS BEEN RECODED IN 1.9, THIS NEEDS TO BE READDED TO THE NEW SYSTEM.
-				|| hasAbility(player, SurgeWall.class) || hasAbility(player, IceSpikeBlast.class)) {
-			return true;
-		}
-		return false;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static boolean hasWaterBottle(Player player) {
-		return getWaterBottleIndex(player) != -1;
+		return !hasAbility(player, WaterReturn.class) && !isBending(player) && getWaterBottleIndex(player) != -1;
+		//hasAbility and isBending to be removed when this mechanic is properly checked by WaterManipulation, OctopusForm, SurgeWall, and IceSpikeBlast
 	}
 
 	public static boolean emptyWaterBottle(Player player) {
