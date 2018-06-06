@@ -164,6 +164,19 @@ public class WaterReturn extends WaterAbility {
 	public static int getWaterBottleIndex(Player player) {
 		return player.getInventory().first(standardWaterBottle);
 	}
+	
+	public static boolean isCurrentlyUsable(Player player) {
+		if (player == null) return false;
+		BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+		return bPlayer.isOnCooldown("Bottlebending");
+	}
+					      
+	public static void markInUse(Player player) {
+		if (player == null) return;
+		BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+		if (!bPlayer.hasElement(Element.WATER)) return;
+		bPlayer.addCooldown("Bottlebending", 50);
+	}
 
 	public long getTime() {
 		return time;
